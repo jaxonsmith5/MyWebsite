@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NFL Wordle</title>
+<style>
+    body {
+        background: linear-gradient(135deg, #013369, #d50a0a);
+        font-family: 'Arial Black', Arial, sans-serif;
+        color: white;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        margin-top: 30px;
+        letter-spacing: 3px;
+    }
+
+    .container {
+        width: 350px;
+        margin: 30px auto;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .cell {
+        border: 2px solid #fff;
+        height: 60px;
+        line-height: 60px;
+        font-size: 28px;
+        text-transform: uppercase;
+        background-color: rgba(0,0,0,0.2);
+    }
+
+    .correct {
+        background-color: #2ecc71;
+    }
+
+    .present {
+        background-color: #f1c40f;
+    }
+
+    .absent {
+        background-color: #555;
+    }
+
+    input {
+        width: 200px;
+        height: 40px;
+        font-size: 18px;
+        text-transform: uppercase;
+        text-align: center;
+        border-radius: 5px;
+        border: none;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #fff;
+        color: #013369;
+        font-weight: bold;
+    }
+
+    .message {
+        margin-top: 15px;
+        min-height: 24px;
+    }
+
+    a {
+        color: #aee1ff;
+        display: block;
+        margin-top: 25px;
+        text-decoration: none;
+    }
+</style>
+</head>
+<body>
+
+<h1>🏈 NFL WORDLE 🏈</h1>
+<p>Guess the 5‑letter NFL‑themed word</p>
+
+<div class="container">
+    <div id="grid"></div>
+
+    <input type="text" id="guess" maxlength="5" placeholder="Enter guess">
+    <br>
+    <button onclick="submitGuess()">Submit Guess</button>
+
+    <div class="message" id="message"></div>
+</div>
+
+<a href="index.html">← Back to Main Page</a>
+
+<script>
+    const words = ["STEEL", "EAGLE", "CHIEF", "TITAN", "RAMPS", "GIANT", "JETSS", "BILLS", "BEARS"];
+    const answer = words[Math.floor(Math.random() * words.length)];
+    const maxGuesses = 6;
+    let currentGuess = 0;
+
+    const grid = document.getElementById("grid");
+
+    // Create grid
+    for (let i = 0; i < maxGuesses * 5; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        grid.appendChild(cell);
+    }
+
+    function submitGuess() {
+        const input = document.getElementById("guess");
+        const guess = input.value.toUpperCase();
+        const message = document.getElementById("message");
+
+        if (guess.length !== 5) {
+            message.textContent = "Enter a 5‑letter word.";
+            return;
+        }
+
+        if (currentGuess >= maxGuesses) return;
+
+        const startIndex = currentGuess * 5;
+        const answerLetters = answer.split("");
+        const guessLetters = guess.split("");
+
+        // First pass: correct
+        guessLetters.forEach((letter, i) => {
+            const cell = grid.children[startIndex + i];
+            cell.textContent = letter;
+            if (letter === answer[i]) {
+                cell.classList.add("correct");
+                answerLetters[i] = null;
+                guessLetters[i] = null;
+            }
+        });
+
+        // Second pass: present / absent
+        guessLetters.forEach((letter, i) => {
+            if (!letter) return;
+            const cell = grid.children[startIndex + i];
+            if (answerLetters.includes(letter)) {
+                cell.classList.add("present");
+                answerLetters[answerLetters.indexOf(letter)] = null;
+            } else {
+                cell.classList.add("absent");
+            }
+        });
+
+        if (guess === answer) {
+            message.textContent = "🏆 Touchdown! You guessed it!";
+            return;
+        }
+
+        currentGuess++;
+        input.value = "";
+
+        if (currentGuess === maxGuesses) {
+            message.textContent = `Game Over! The word was ${answer}`;
+        }
+    }
+</script>
+
+</body>
+</html>
